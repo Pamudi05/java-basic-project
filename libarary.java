@@ -1,9 +1,12 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class libarary {
     static final int MAX_MEMBERS = 200;
     static final int MAX_BOOKS = 300;
     static final int MAX_BORROW_TRANSACTIONS = 500;
+    static final int MAX_MEMBER_BORROWS = 3;
     static final int MAX_RESERVATION = 100;
 
     //Mmenbers Array
@@ -12,6 +15,7 @@ public class libarary {
     static String[] membersAddresses = new String[MAX_MEMBERS];
     static String[] membersPhoneNumbers = new String[MAX_MEMBERS];
     static String[] membersMembershipType = new String[MAX_MEMBERS];
+    static int[] memberBorrowCount  = new int[MAX_MEMBERS];
     static int membersCount = 0;
 
     //Books Array
@@ -80,7 +84,7 @@ public class libarary {
            System.out.println("2. View All Members");
            System.out.println("3. Search Member");
            System.out.println("4. Update Member");
-           System.out.println("6. Back to Main Menu");
+           System.out.println("5. Back to Main Menu");
            System.out.println("Enter Your choice: ");
 
            int choice = scanner.nextInt();
@@ -223,8 +227,304 @@ public class libarary {
     }
 //========Manage Members==============
 
-    static void manageBooks() {}
-    static void manageBrowingTransaction() {}
+//========Manage Books==============
+    static void manageBooks() {
+        while(true) {
+           System.out.println("===Books MANAGEMENT===");
+           System.out.println("1. Add Book");
+           System.out.println("2. View All Books");
+           System.out.println("3. Search Book");
+           System.out.println("4. Update Book");
+           System.out.println("5. Book Availability");
+           System.out.println("6. Back to Main Menu");
+           System.out.println("Enter Your choice: ");
+
+           int choice = scanner.nextInt();
+           scanner.nextLine();
+           switch (choice) {
+            case 1:
+                addBook();
+                break;
+            case 2:
+                viewAllBooks();
+                break;
+            case 3:
+                searchBook();
+                break;
+            case 4:
+                updateBook();
+                break;
+            case 5:
+                bookAvailability();
+                break;
+            case 6:
+                return;
+            default:
+                System.out.println("Invalid choice. please try again");
+           }
+        }
+    }
+
+    static void addBook(){
+        if(booksCount >= MAX_BOOKS){
+            System.out.println("Books limit reached!");
+            return;
+        }
+
+        System.out.println("Enter Book Id (ex: P001) : ");
+        String bookId = scanner.nextLine();
+
+        for(int i =0; i<booksCount; i++){
+            if(bookId.equals(booksIds[i])){
+                System.out.println("Book Id Already Exists");
+                return;
+            }
+        }
+
+        System.out.println("Enter Book Title: ");
+        String title = scanner.nextLine();
+
+        System.out.println("Enter Book Author");
+        String author = scanner.nextLine();
+
+        System.out.println("Enter Book Genre");
+        String genre = scanner.nextLine();
+
+        System.out.println("Enter Book year");
+        int year = scanner.nextInt();
+
+        System.out.println("Enter Book copies");
+        int copy = scanner.nextInt();
+
+        booksIds[booksCount] = bookId;
+        booksTitles[booksCount] = title;
+        booksAuthors[booksCount] = author;
+        booksGenres[booksCount] = genre;
+        booksPublishYear[booksCount] = year;
+        booksAvailableCopies[booksCount] = copy;
+        booksCount++;
+
+        System.out.println("Book added successfully!");
+    }
+
+    static void viewAllBooks(){
+        if (booksCount == 0) {
+            System.out.println("There are No Books");
+            return;
+        }
+
+        System.out.println("\n===All Bookd");
+        System.out.printf("%-5s %-20s %-30s %-10s %-20s%n", "Id", "Title", "Author", "Genre", "Copies");
+        System.out.println("-".repeat(100));
+
+        for(int i=0; i<booksCount;i++){
+            System.out.printf("%-5s %-20s %-30s %-10s %-20s%n", booksIds[i],booksTitles[i],booksAuthors[i],booksGenres[i],booksAvailableCopies[i]);
+        }
+    }
+
+    static void searchBook(){
+        System.out.println("Enter Book Id , title or author to search");
+        String input = scanner.nextLine();
+
+        for(int i=0; i<booksCount; i++){
+            if((input.equalsIgnoreCase(booksIds[i])) || input.equalsIgnoreCase(booksTitles[i]) || input.equalsIgnoreCase(booksAuthors[i])){
+                System.out.println("\nBook Found");
+                System.out.println("ID: " + booksIds[i]);
+                System.out.println("Title: " + booksTitles[i]);
+                System.out.println("Author: " + booksAuthors[i]);
+                System.out.println("Genre: " + booksGenres[i]);
+                System.out.println("Available copies: " + booksAvailableCopies[i]);
+                return;
+            }
+        }
+        System.out.println("Book Not Found");
+    }
+
+    static void updateBook(){
+        System.out.println("Enter Book Id to update");
+        String bookId = scanner.nextLine();
+
+        for(int i=0; i<booksCount; i++){
+            if(bookId.equals(booksIds[i])){
+                System.out.println("Current Details:");
+                System.out.println("Title: " + booksTitles[i]);
+                System.out.println("Author: " + booksAuthors[i]);
+                System.out.println("Publish Year: " + booksPublishYear[i]);
+                System.out.println("Genre: " + booksGenres[i]);
+                System.out.println("Available copy: " + booksAvailableCopies[i]);
+
+                System.out.println("Enter new Title (or press Enter to keep the current) ");
+                String title = scanner.nextLine();
+                if (!title.trim().isEmpty()) {
+                    booksTitles[i] = title;
+                }
+
+                System.out.println("Enter new Author (or press Enter to keep the current) ");
+                String author = scanner.nextLine();
+                if (!author.trim().isEmpty()) {
+                    booksAuthors[i] = author;
+                }
+
+                System.out.println("Enter new Genre (or press Enter to keep the current) ");
+                String genre = scanner.nextLine();
+                if (!genre.trim().isEmpty()) {
+                    booksGenres[i] = genre;
+                }
+                
+                System.out.println("Enter new Year (or -1 to keep the current) ");
+                int year = scanner.nextInt();
+                if (year != 0) {
+                    booksPublishYear[i] = year;
+                }
+
+                System.out.println("Enter new Available copies (or -1 to keep the current) ");
+                int copy = scanner.nextInt();
+                if (copy != -1) {
+                    booksAvailableCopies[i] = copy;
+                }
+
+                System.out.println("Book Updated Successfully!");
+                return;
+            }
+        }
+        System.out.println("Book Not Found");
+    }
+
+    static void bookAvailability(){
+        System.out.println("Enter Book Id");
+        String bookId = scanner.nextLine();
+
+        for(int i=0; i < booksCount; i++){
+            if(bookId.equals(booksIds[i])){
+                System.out.println("Current Available Books : " + booksAvailableCopies[i]);
+                System.out.println("Enter book copy to add (or remove substact)");
+                int change = scanner.nextInt();
+
+                if(booksAvailableCopies[i] + change < 0){
+                    System.out.println("Insufficient Book");
+                    return;
+                }
+                booksAvailableCopies[i] += change;
+                System.out.println("Book Available Copies Updated!" + booksAvailableCopies[i]);
+                return;
+            }
+        }
+        System.out.println("Book Not Found");
+    }
+
+//========Manage Books==============
+
+//========Borrow Books==============
+    static void manageBrowingTransaction() {
+        while(true) {
+           System.out.println("===Books Borrow MANAGEMENT===");
+           System.out.println("1. Borrow Book");
+           System.out.println("2. Return Books");
+           System.out.println("3. Back to Main Menu");
+           System.out.println("Enter Your choice: ");
+
+           int choice = scanner.nextInt();
+           scanner.nextLine();
+           switch (choice) {
+            case 1:
+                borrowBook();
+                break;
+            case 2:
+                returnBooks();
+                break;
+            case 3:
+                return;
+            default:
+                System.out.println("Invalid choice. please try again");
+           }
+        }
+    }
+
+    static int nextTransactionId = 1;
+    static void borrowBook(){
+        if(borrowsCount >= MAX_BORROW_TRANSACTIONS){
+            System.out.println("Book borrow limit reached!");
+            return;
+        }
+
+        if(membersCount == 0){
+            System.out.println("There is no Member! Please add one");
+            return;
+        }
+
+        if(booksCount == 0){
+            System.out.println("There is no Book! Please add one");
+            return;
+        }
+
+        int transactionBooksIds = nextTransactionId++;
+        System.out.println("Transaction Id: " + transactionBooksIds);
+
+        System.out.println("Enter Member Id: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+        int memberIndex = -1;
+        for(int i=0; i < membersCount; i++){
+            if(memberId == membersIds[i]){
+                memberIndex= i;
+                break;
+            }
+        }
+
+        if(memberIndex == -1){
+            System.out.println("Member does not exist!");
+            return;
+        }
+
+        if(memberBorrowCount[memberIndex] >= MAX_MEMBER_BORROWS){
+            System.out.println("This member has already borrowed the maximum number of books (" + MAX_MEMBER_BORROWS + ").");
+            return;
+        }
+
+        System.out.println("Enter book Id: ");
+        String bookId = scanner.nextLine();
+        
+        int bookIndex = -1;
+        for(int i=0; i < booksCount; i++){
+            if(bookId.equalsIgnoreCase(booksIds[i])){
+                bookIndex= i;
+                break;
+            }
+        }
+
+        if(bookIndex == -1){
+            System.out.println("Book does not exist!");
+            return;
+        }
+
+        if (booksAvailableCopies[bookIndex] <= 0) {
+            System.out.println("Book is not available!");
+            return;
+        }
+
+        booksAvailableCopies[bookIndex]--;
+        memberBorrowCount[memberIndex]++;
+        borrowsCount++;
+
+        LocalDate borrowDate = LocalDate.now();
+        LocalDate dueDate = borrowDate.plusDays(14);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+        
+        System.out.println("Book borrowed successfully!");
+        System.out.println("Transaction ID: " + transactionIds);
+        System.out.println("Borrow Date: " + borrowDate.format(formatter));
+        System.out.println("Due Date: " + dueDate.format(formatter));
+        System.out.println("Remaining copies of " + bookId + ": " + booksAvailableCopies[bookIndex]);
+        System.out.println("Books currently borrowed by Member " + memberId + ", " + memberBorrowCount[memberIndex] + " books");
+
+    }
+    
+    static void returnBooks(){
+        
+    }
+//========Borrow Books==============
+
     static void manageReservation() {}
 
     //What display on main menu
@@ -241,9 +541,9 @@ public class libarary {
     //initialize Simple Data
     public static void initializeSimpleData() {
         // sample members
-        membersIds[0] = 1; membersNames[0] = "Kamal Silva"; membersAddresses[0] = "Colombo"; membersPhoneNumbers[0] = "071567276";membersMembershipType[0] = "Regular";
-        membersIds[1] = 2;membersNames[1] = "Jagath Kumara";membersAddresses[1] = "Kalutara";membersPhoneNumbers[1] = "0712563738";membersMembershipType[1] = "Premium";
-        membersIds[2] = 3;membersNames[2] = "Nihal Bandara";membersAddresses[2] = "Kandy";membersPhoneNumbers[2] = "07723762763";membersMembershipType[2] = "Student";
+        membersIds[0] = 1; membersNames[0] = "Kamal Silva"; membersAddresses[0] = "Colombo"; membersPhoneNumbers[0] = "071567276";membersMembershipType[0] = "Regular";memberBorrowCount[0] = 3;
+        membersIds[1] = 2;membersNames[1] = "Jagath Kumara";membersAddresses[1] = "Kalutara";membersPhoneNumbers[1] = "0712563738";membersMembershipType[1] = "Premium";memberBorrowCount[1] = 4;
+        membersIds[2] = 3;membersNames[2] = "Nihal Bandara";membersAddresses[2] = "Kandy";membersPhoneNumbers[2] = "07723762763";membersMembershipType[2] = "Student";memberBorrowCount[2] = 1;
         membersCount = 3;
 
         // sample books
