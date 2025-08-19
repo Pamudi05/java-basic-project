@@ -45,7 +45,7 @@ public class libarary {
     static int[] reservationsMembersIds = new int[MAX_RESERVATION];
     static String[] reservationsBooksIds = new String[MAX_RESERVATION];
     static String[] reservationsDate = new String[MAX_RESERVATION];
-    static String[] reservationsSatatus = new String[MAX_RESERVATION];
+    static String[] reservationsStatus = new String[MAX_RESERVATION];
     static int reservationsCount = 0;
 
     static Scanner scanner = new Scanner(System.in);
@@ -70,6 +70,9 @@ public class libarary {
                     manageReservation();
                     break;
                 case 5:
+                    generateReport();
+                    break;
+                case 6:
                     System.out.println("Thank you for using Library system!");
                     return;
                 default:
@@ -583,7 +586,100 @@ public class libarary {
     }
 //========Borrow Books==============
 
-    static void manageReservation() {}
+//========Reservation Books==============
+    static void manageReservation() {
+        while(true) {
+            System.out.println("===Reserve Books MANAGEMENT===");
+            System.out.println("1. Reserve Book");
+            System.out.println("2. View Reservation");
+            System.out.println("3. Back to Main Menu");
+            System.out.println("Enter Your choice: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+            case 1:
+                reserveBook();
+                break;
+            case 2:
+                viewReservation();
+                break;
+            case 3:
+                return;
+            default:
+                System.out.println("Invalid choice. please try again");
+            }
+        }
+    }
+
+    static int nextReservationsId = 1;
+    static void reserveBook(){
+        if(membersCount == 0){
+            System.out.println("There is no Member! Please add one");
+            return;
+        }
+
+        if(booksCount == 0){
+            System.out.println("There is no Book! Please add one");
+            return;
+        }
+
+        int reservationsIds = nextReservationsId++;
+        System.out.println("Reservations Id: " + reservationsIds);
+
+        System.out.print("Enter Member Id: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+         int memberIndex = -1;
+        for(int i=0; i < membersCount; i++){
+            if(memberId == membersIds[i]){
+                memberIndex= i;
+                break;
+            }
+        }
+
+        if(memberIndex == -1){
+            System.out.println("Member does not exist!");
+            return;
+        }
+
+        System.out.print("Enter book Id: ");
+        String bookId = scanner.nextLine();
+        
+        int bookIndex = -1;
+        for(int i=0; i < booksCount; i++){
+            if(bookId.equalsIgnoreCase(booksIds[i])){
+                bookIndex= i;
+                break;
+            }
+        }
+
+        if(bookIndex == -1){
+            System.out.println("Book does not exist!");
+            return;
+        }
+
+        if (booksAvailableCopies[bookIndex] <= 0) {
+            reservationsBooksIds[reservationsCount] = bookId;
+            reservationsMembersIds[reservationsCount] = memberId;
+            reservationsStatus[reservationsCount] = "active";
+            reservationsCount++;
+            System.out.println("Book is not available right now" );
+            System.out.println("Reservation created for Member " + memberId);
+            System.out.println("Reservation created for Book " + bookId);
+            System.out.println("Reservation status " + reservationsStatus[reservationsCount - 1]);
+            System.out.println("Reservation count " + reservationsCount);
+            return;
+        }
+    }
+
+    static void viewReservation(){}
+//========Reservation Books==============
+
+//========Generate Reports==============
+    static void generateReport(){}
+//========Generate Reports==============
 
     //What display on main menu
     static void displayMainMenu() {
@@ -592,7 +688,8 @@ public class libarary {
        System.out.println("2. Manage Books");
        System.out.println("3. Process Borrowing Transaction");
        System.out.println("4. View Reservation");
-       System.out.println("5. Exit");
+       System.out.println("5. View Report");
+       System.out.println("6. Exit");
        System.out.println("Enter Your choice: ");
     }
 
