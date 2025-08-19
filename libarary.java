@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class libarary {
@@ -36,12 +37,13 @@ public class libarary {
     static String[] transactionDueDate = new String[MAX_BORROW_TRANSACTIONS];
     static String[] transactionReturnDate = new String[MAX_BORROW_TRANSACTIONS];
     static double[] transactionFineAmount = new double[MAX_BORROW_TRANSACTIONS];
+    static boolean[] transactionActive  = new boolean[MAX_BORROW_TRANSACTIONS];
     static int borrowsCount = 0;
 
     //Reservation array
     static int[] reservationsIds = new int[MAX_RESERVATION];
     static int[] reservationsMembersIds = new int[MAX_RESERVATION];
-    static String[] reservationsBooksIds = new String[MAX_BORROW_TRANSACTIONS];
+    static String[] reservationsBooksIds = new String[MAX_RESERVATION];
     static String[] reservationsDate = new String[MAX_RESERVATION];
     static String[] reservationsSatatus = new String[MAX_RESERVATION];
     static int reservationsCount = 0;
@@ -521,7 +523,63 @@ public class libarary {
     }
     
     static void returnBooks(){
+        System.out.println("Enter Member Id: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter Book Id: ");
+        String bookId = scanner.nextLine();
+
+        int transactionIndex = -1;
+        for(int i=0; i<borrowsCount; i++){
+            if(memberId == transactionMembersIds[i] &&
+                bookId.equalsIgnoreCase(transactionBooksIds[i]) &&
+                transactionActive[i]){
+                    transactionIndex = i;
+                    break;
+            }
+        }
+
+        if(transactionIndex == -1){
+            System.out.println("No active borrowing transaction found!");
+            return;
+        }
+
+        String returnDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        transactionReturnDate[transactionIndex] = returnDate;
+        transactionActive[transactionIndex] = false;
+
+        for(int i=0; i<booksCount; i++){
+            if(bookId.equalsIgnoreCase(booksIds[i])){
+                booksAvailableCopies[i]++;
+                break;
+            }
+        }
+
+        for(int i=0; i<membersCount; i++){
+            if(memberId == membersIds[i]) {
+                memberBorrowCount[i]++;
+                break;
+            }
+        }
+
+        LocalDate dateDue = LocalDate.now().plusDays(14);
+        transactionDueDate[transactionIndex] = dateDue.toString();
         
+        LocalDate dateReturn = LocalDate.now();
+
+        long lateDays = ChronoUnit.DAYS.between(dateDue, dateReturn);
+        long fine = (lateDays > 0) ? lateDays : 0;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        System.out.println("Book returned successfully!");
+        System.out.println("Return Date: " + dateReturn.format(formatter));
+
+        if (fine > 0) {
+            System.out.println("This book was returned late. Fine: $" + fine);
+        } else {
+            System.out.println("No fine. Returned on time.");
+        }
     }
 //========Borrow Books==============
 
@@ -542,9 +600,11 @@ public class libarary {
     public static void initializeSimpleData() {
         // sample members
         membersIds[0] = 1; membersNames[0] = "Kamal Silva"; membersAddresses[0] = "Colombo"; membersPhoneNumbers[0] = "071567276";membersMembershipType[0] = "Regular";memberBorrowCount[0] = 3;
-        membersIds[1] = 2;membersNames[1] = "Jagath Kumara";membersAddresses[1] = "Kalutara";membersPhoneNumbers[1] = "0712563738";membersMembershipType[1] = "Premium";memberBorrowCount[1] = 4;
+        membersIds[1] = 2;membersNames[1] = "Jagath Kumara";membersAddresses[1] = "Kalutara";membersPhoneNumbers[1] = "0712563738";membersMembershipType[1] = "Premium";memberBorrowCount[1] = 2;
         membersIds[2] = 3;membersNames[2] = "Nihal Bandara";membersAddresses[2] = "Kandy";membersPhoneNumbers[2] = "07723762763";membersMembershipType[2] = "Student";memberBorrowCount[2] = 1;
-        membersCount = 3;
+        membersIds[3] = 4;membersNames[3] = "Janaka Silva";membersAddresses[3] = "Galle";membersPhoneNumbers[3] = "03733763763";membersMembershipType[3] = "Premium";memberBorrowCount[3] = 3;
+        membersIds[4] = 5;membersNames[4] = "Sumana Perera";membersAddresses[4] = "Anuradapura";membersPhoneNumbers[4] = "04743764763";membersMembershipType[4] = "Regular";memberBorrowCount[4] = 0;
+        membersCount = 5;
 
         // sample books
         booksIds[0] = "P001";booksTitles[0] = "Laptop";booksAuthors[0] = "asj";booksGenres[0] = "romance";booksPublishYear[0] = 2000;booksTotalCopies[0]=1;booksAvailableCopies[0]=0;
@@ -552,9 +612,20 @@ public class libarary {
         booksIds[2] = "P003";booksTitles[2] = "USB Keyboard";booksAuthors[2] = "sdsf";booksGenres[2] = "fantacy";booksPublishYear[2] = 2002;booksTotalCopies[2]=20;booksAvailableCopies[2]=10;
         booksIds[3] = "P004";booksTitles[3] = "Printers";booksAuthors[3] = "fdgdf";booksGenres[3] = "horror";booksPublishYear[3] = 2003;booksTotalCopies[3]=40;booksAvailableCopies[3]=20;
         booksIds[4] = "P005";booksTitles[4] = "Monitor";booksAuthors[4] = "dfgdfg";booksGenres[4] = "anime";booksPublishYear[4] = 2004;booksTotalCopies[4]=34;booksAvailableCopies[4]=30;
-        booksCount = 5;
+        booksIds[5] = "P006";booksTitles[5] = "Bottle";booksAuthors[5] = "657";booksGenres[5] = "cartoon";booksPublishYear[5] = 2005;booksTotalCopies[5]=35;booksAvailableCopies[5]=40;
+        booksIds[6] = "P007";booksTitles[6] = "Pen";booksAuthors[6] = "hjty";booksGenres[6] = "comedy";booksPublishYear[6] = 2006;booksTotalCopies[6]=36;booksAvailableCopies[6]=50;
+        booksIds[7] = "P008";booksTitles[7] = "Stick";booksAuthors[7] = "bvn";booksGenres[7] = "cultural";booksPublishYear[7] = 2007;booksTotalCopies[7]=37;booksAvailableCopies[7]=6;
+        booksIds[8] = "P009";booksTitles[8] = "Show";booksAuthors[8] = "iuk";booksGenres[8] = "romance";booksPublishYear[8] = 2008;booksTotalCopies[8]=38;booksAvailableCopies[8]=70;
+        booksIds[9] = "P010";booksTitles[9] = "Flower";booksAuthors[9] = "78iuiy";booksGenres[9] = "fight";booksPublishYear[9] = 2009;booksTotalCopies[9]=39;booksAvailableCopies[9]=8;
+        booksCount = 10;
+
+        // sample borrow transaction
+        transactionIds[0] = 1;transactionMembersIds[0] =1;transactionBooksIds[0] = "P003";transactionBorrowDate[0] = "2025-07-01";transactionDueDate[0] ="2025-07-15";transactionReturnDate[0]="2025-07-15";transactionFineAmount[0]=1;transactionActive[0]=true;
+        transactionIds[1] = 2;transactionMembersIds[1] =3;transactionBooksIds[1] = "P006";transactionBorrowDate[1] = "2025-08-01";transactionDueDate[1] ="2025-08-15";transactionReturnDate[1]="2025-08-10";transactionFineAmount[1]=1;transactionActive[1]=false;
+        transactionIds[2] = 3;transactionMembersIds[2] =5;transactionBooksIds[2] = "P003";transactionBorrowDate[2] = "2025-09-02";transactionDueDate[2] ="2025-09-25";transactionReturnDate[2]="2025-10-15";transactionFineAmount[1]=1;transactionActive[2]=true;
+        borrowsCount = 3;
 
        System.out.println("sample data initialized!");
-       System.out.println("3 members and 5 books addedd!.");
+       System.out.println("5 members, 3 borrows and 10 books addedd!.");
     }
 }
