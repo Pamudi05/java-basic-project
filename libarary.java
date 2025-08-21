@@ -27,6 +27,7 @@ public class libarary {
     static int[] booksPublishYear = new int[MAX_BOOKS];
     static int[] booksTotalCopies = new int[MAX_BOOKS];
     static int[] booksAvailableCopies = new int[MAX_BOOKS];
+    static int[] booksBorrowCount = new int[MAX_BOOKS];
     static int booksCount = 0;
 
     //Browing Transaction arrays
@@ -592,7 +593,8 @@ public class libarary {
             System.out.println("===Reserve Books MANAGEMENT===");
             System.out.println("1. Reserve Book");
             System.out.println("2. View Reservation");
-            System.out.println("3. Back to Main Menu");
+            System.out.println("3. Cancel Reservation");
+            System.out.println("4. Back to Main Menu");
             System.out.println("Enter Your choice: ");
 
             int choice = scanner.nextInt();
@@ -605,6 +607,9 @@ public class libarary {
                 viewReservation();
                 break;
             case 3:
+                cancelReservation();
+                break;
+            case 4:
                 return;
             default:
                 System.out.println("Invalid choice. please try again");
@@ -624,8 +629,8 @@ public class libarary {
             return;
         }
 
-        int reservationsIds = nextReservationsId++;
-        System.out.println("Reservations Id: " + reservationsIds);
+        int reservationsId = nextReservationsId++;
+        System.out.println("Reservations Id: " + reservationsId);
 
         System.out.print("Enter Member Id: ");
         int memberId = scanner.nextInt();
@@ -660,9 +665,13 @@ public class libarary {
             return;
         }
 
+        String reserveDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
         if (booksAvailableCopies[bookIndex] <= 0) {
+            reservationsIds[reservationsCount]=reservationsId;
             reservationsBooksIds[reservationsCount] = bookId;
             reservationsMembersIds[reservationsCount] = memberId;
+            reservationsDate[reservationsCount]= reserveDate;
             reservationsStatus[reservationsCount] = "active";
             reservationsCount++;
             System.out.println("Book is not available right now" );
@@ -674,11 +683,189 @@ public class libarary {
         }
     }
 
-    static void viewReservation(){}
-//========Reservation Books==============
+    static void viewReservation(){
+        if (reservationsCount == 0) {
+        System.out.println("There are No Reservation");
+        return;
+        }
+
+        System.out.println("\n===All Reservations");
+        System.out.printf("%-5s %-20s %-30s %-10s %-20s%n", "Id", "Member Id", "Book Id", "Reserve Date", "Status");
+        System.out.println("-".repeat(100));
+
+        for(int i=0; i<reservationsCount;i++){
+            if (reservationsStatus[i].equalsIgnoreCase("active")) {
+                System.out.printf("%-5s %-20s %-30s %-10s %-20s%n", reservationsIds[i],reservationsMembersIds[i],reservationsBooksIds[i],reservationsDate[i],reservationsStatus[i]);
+            }   
+        }
+
+        for (int i = 0; i < reservationsCount; i++) {
+            for (int j = 0; j < membersCount; j++) {
+                if (reservationsMembersIds[i] == membersIds[j]) {
+                    System.out.println("\n--- Member Details for Reservation ID: " + reservationsIds[i]);
+                    System.out.println("Member Id: " + membersIds[j]);
+                    System.out.println("Member Name: " + membersNames[j]);
+                    System.out.println("Member Address: " + membersAddresses[j]);
+                    System.out.println("Member Borrow count: " + memberBorrowCount[j]);
+                    System.out.println("Membership Type: " + membersMembershipType[j]);
+                }
+            }
+
+            for (int k = 0; k < booksCount; k++) {
+                if (reservationsBooksIds[i].equalsIgnoreCase(booksIds[k])) {
+                    System.out.println("\n--- Book Details for Reservation ID: " + reservationsIds[i]);
+                    System.out.println("Book Id: " + booksIds[k]);
+                    System.out.println("Book Title: " + booksTitles[k]);
+                    System.out.println("Book Authors: " + booksAuthors[k]);
+                    System.out.println("Book Genre: " + booksGenres[k]);
+                    System.out.println("Book Publish Year: " + booksPublishYear[k]);
+                    System.out.println("Book Total Copy: " + booksTotalCopies[k]);
+                    System.out.println("Book Available Copy: " + booksAvailableCopies[k]);
+                }
+            }
+        }
+    }
+
+    static void cancelReservation() {
+        if (reservationsCount == 0) {
+            System.out.println("There are no Reservations.");
+            return;
+        }
+
+        System.out.print("Enter Reservation Id: ");
+        int resvationId = scanner.nextInt();
+        scanner.nextLine();
+
+        for (int i = 0; i < reservationsCount; i++) {
+            if (reservationsIds[i] == resvationId) {
+                if (!reservationsStatus[i].equalsIgnoreCase("Cancelled")) {
+                    reservationsStatus[i] = "Cancelled";
+                    System.out.println("Reservation " + resvationId + " has been cancelled.");
+                } else {
+                    System.out.println("Reservation " + resvationId + " is already cancelled.");
+                }
+                break;
+            }
+        }
+    }
+
+    //========Reservation Books==============
 
 //========Generate Reports==============
-    static void generateReport(){}
+    static void generateReport(){
+        while (true) {
+            System.out.println("\n=== REPORTS ===");
+            System.out.println("1. Library Statistic Report");
+            System.out.println("2. Member Active Report");
+            System.out.println("3. Popular Book Report");
+            System.out.println("4. Overdue Book Report");
+            System.out.println("5. Back to Main Menu");
+            System.out.println("Enter Your Choice");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1:
+                    libraryStatisticReport();
+                    break;
+                case 2:
+                    memberActiveReport();
+                    break;
+                case 3:
+                    popularBookReport();
+                    break;
+                case 4:
+                    //overdueBookReport();
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    static void libraryStatisticReport() {
+        System.out.println("\n===Library Statistics Report");
+        System.out.printf("%-5s %-20s %-30s %-10s %-20s%n", "Total Books", "Total Members", "Borrowed Book", "Available Books", "Total Fine");
+        System.out.println("-".repeat(100));
+
+        int totalBorrowedBooks = 0;
+        for (int i = 0; i < booksCount; i++) {
+            totalBorrowedBooks += booksTotalCopies[i] - booksAvailableCopies[i];
+        }
+
+        int totalAvailableBooks = 0;
+        for (int i = 0; i < booksCount; i++) {
+            totalAvailableBooks += booksAvailableCopies[i];
+        }
+
+        int totalFineAmount = 0;
+        for (int i = 0; i < borrowsCount; i++) {
+            totalFineAmount += transactionFineAmount[i];
+        }
+ 
+        System.out.printf("%-15s %-20s %-30s %-15s %-20s%n", booksCount,membersCount,totalBorrowedBooks, totalAvailableBooks,totalFineAmount);
+    }
+
+    static void memberActiveReport() {
+        if(borrowsCount == 0){
+            System.out.println("No Borrow found!");
+            return;
+        }
+
+        System.out.println("\n===Member Activity Report");
+        System.out.printf("%-5s %-20s %-30s%n", "Current Borrow", "Borrowing History", "Total Fine per person");
+        System.out.println("-".repeat(100));
+
+        for(int i=0; i<membersCount; i++){
+            double totalFine = 0;
+            for(int j = 0; j < borrowsCount; j++) {
+                if(membersIds[i] == transactionMembersIds[j]){
+                    totalFine += transactionFineAmount[j];
+                }
+            }
+
+            if(borrowsCount > 0) {
+                 System.out.printf("%-15s %-20s %-30s%n", memberBorrowCount[i],membersNames[i],totalFine);
+            }
+        }
+    }
+
+    static void popularBookReport() {
+        if (booksCount == 0) {
+            System.out.println("No books available.");
+            return;
+        }
+
+        System.out.println("\n=== Popular Book Report ===");
+        System.out.printf("%-10s %-30s %-20s %-15s %-10s%n","Book ID", "Title", "Author", "Genre", "Borrow Count");
+        System.out.println("-".repeat(115));
+
+        for(int i=0; i<booksCount;i++){
+            for(int j=i+1; j<booksCount; j++){
+                if(booksBorrowCount[i] < booksBorrowCount[j]){
+
+                    int temp = booksBorrowCount[i];
+                    booksBorrowCount[i] = booksBorrowCount[j];
+                    booksBorrowCount[j] = temp;
+
+                    String tempId = booksIds[i]; booksIds[i] = booksIds[j]; booksIds[j] = tempId;
+                    String tempTitle = booksTitles[i]; booksTitles[i] = booksTitles[j]; booksTitles[j] = tempTitle;
+                    String tempAuthor = booksAuthors[i]; booksAuthors[i] = booksAuthors[j]; booksAuthors[j] = tempAuthor;
+                    String tempGenre = booksGenres[i]; booksGenres[i] = booksGenres[j]; booksGenres[j] = tempGenre;
+                    int tempYear = booksPublishYear[i]; booksPublishYear[i] = booksPublishYear[j]; booksPublishYear[j] = tempYear;
+                    int tempCopies = booksTotalCopies[i]; booksTotalCopies[i] = booksTotalCopies[j]; booksTotalCopies[j] = tempCopies;
+                    int tempAvail = booksAvailableCopies[i]; booksAvailableCopies[i] = booksAvailableCopies[j]; booksAvailableCopies[j] = tempAvail;
+                }
+            }
+        }
+
+        for (int i = 0; i < booksCount; i++) {
+            System.out.printf("%-10s %-30s %-20s %-15s %-10d%n",booksIds[i], booksTitles[i], booksAuthors[i], booksGenres[i], booksBorrowCount[i]);
+        }
+    }
+    
 //========Generate Reports==============
 
     //What display on main menu
@@ -704,16 +891,16 @@ public class libarary {
         membersCount = 5;
 
         // sample books
-        booksIds[0] = "P001";booksTitles[0] = "Laptop";booksAuthors[0] = "asj";booksGenres[0] = "romance";booksPublishYear[0] = 2000;booksTotalCopies[0]=1;booksAvailableCopies[0]=0;
-        booksIds[1] = "P002";booksTitles[1] = "Mouse";booksAuthors[1] = "ddfdsf";booksGenres[1] = "thriller";booksPublishYear[1] = 2001;booksTotalCopies[1]=10;booksAvailableCopies[1]=5;
-        booksIds[2] = "P003";booksTitles[2] = "USB Keyboard";booksAuthors[2] = "sdsf";booksGenres[2] = "fantacy";booksPublishYear[2] = 2002;booksTotalCopies[2]=20;booksAvailableCopies[2]=10;
-        booksIds[3] = "P004";booksTitles[3] = "Printers";booksAuthors[3] = "fdgdf";booksGenres[3] = "horror";booksPublishYear[3] = 2003;booksTotalCopies[3]=40;booksAvailableCopies[3]=20;
-        booksIds[4] = "P005";booksTitles[4] = "Monitor";booksAuthors[4] = "dfgdfg";booksGenres[4] = "anime";booksPublishYear[4] = 2004;booksTotalCopies[4]=34;booksAvailableCopies[4]=30;
-        booksIds[5] = "P006";booksTitles[5] = "Bottle";booksAuthors[5] = "657";booksGenres[5] = "cartoon";booksPublishYear[5] = 2005;booksTotalCopies[5]=35;booksAvailableCopies[5]=40;
-        booksIds[6] = "P007";booksTitles[6] = "Pen";booksAuthors[6] = "hjty";booksGenres[6] = "comedy";booksPublishYear[6] = 2006;booksTotalCopies[6]=36;booksAvailableCopies[6]=50;
-        booksIds[7] = "P008";booksTitles[7] = "Stick";booksAuthors[7] = "bvn";booksGenres[7] = "cultural";booksPublishYear[7] = 2007;booksTotalCopies[7]=37;booksAvailableCopies[7]=6;
-        booksIds[8] = "P009";booksTitles[8] = "Show";booksAuthors[8] = "iuk";booksGenres[8] = "romance";booksPublishYear[8] = 2008;booksTotalCopies[8]=38;booksAvailableCopies[8]=70;
-        booksIds[9] = "P010";booksTitles[9] = "Flower";booksAuthors[9] = "78iuiy";booksGenres[9] = "fight";booksPublishYear[9] = 2009;booksTotalCopies[9]=39;booksAvailableCopies[9]=8;
+        booksIds[0] = "P001";booksTitles[0] = "Laptop";booksAuthors[0] = "asj";booksGenres[0] = "romance";booksPublishYear[0] = 2000;booksTotalCopies[0]=1;booksAvailableCopies[0]=0;booksBorrowCount[0]=1;
+        booksIds[1] = "P002";booksTitles[1] = "Mouse";booksAuthors[1] = "ddfdsf";booksGenres[1] = "thriller";booksPublishYear[1] = 2001;booksTotalCopies[1]=10;booksAvailableCopies[1]=5;booksBorrowCount[1]=2;
+        booksIds[2] = "P003";booksTitles[2] = "USB Keyboard";booksAuthors[2] = "sdsf";booksGenres[2] = "fantacy";booksPublishYear[2] = 2002;booksTotalCopies[2]=20;booksAvailableCopies[2]=10;booksBorrowCount[2]=1;
+        booksIds[3] = "P004";booksTitles[3] = "Printers";booksAuthors[3] = "fdgdf";booksGenres[3] = "horror";booksPublishYear[3] = 2003;booksTotalCopies[3]=40;booksAvailableCopies[3]=20;booksBorrowCount[3]=3;
+        booksIds[4] = "P005";booksTitles[4] = "Monitor";booksAuthors[4] = "dfgdfg";booksGenres[4] = "anime";booksPublishYear[4] = 2004;booksTotalCopies[4]=34;booksAvailableCopies[4]=30;booksBorrowCount[4]=1;
+        booksIds[5] = "P006";booksTitles[5] = "Bottle";booksAuthors[5] = "657";booksGenres[5] = "cartoon";booksPublishYear[5] = 2005;booksTotalCopies[5]=35;booksAvailableCopies[5]=40;booksBorrowCount[5]=2;
+        booksIds[6] = "P007";booksTitles[6] = "Pen";booksAuthors[6] = "hjty";booksGenres[6] = "comedy";booksPublishYear[6] = 2006;booksTotalCopies[6]=36;booksAvailableCopies[6]=50;booksBorrowCount[6]=2;
+        booksIds[7] = "P008";booksTitles[7] = "Stick";booksAuthors[7] = "bvn";booksGenres[7] = "cultural";booksPublishYear[7] = 2007;booksTotalCopies[7]=37;booksAvailableCopies[7]=6;booksBorrowCount[7]=3;
+        booksIds[8] = "P009";booksTitles[8] = "Show";booksAuthors[8] = "iuk";booksGenres[8] = "romance";booksPublishYear[8] = 2008;booksTotalCopies[8]=38;booksAvailableCopies[8]=70;booksBorrowCount[8]=1;
+        booksIds[9] = "P010";booksTitles[9] = "Flower";booksAuthors[9] = "78iuiy";booksGenres[9] = "fight";booksPublishYear[9] = 2009;booksTotalCopies[9]=39;booksAvailableCopies[9]=8;booksBorrowCount[9]=1;
         booksCount = 10;
 
         // sample borrow transaction
